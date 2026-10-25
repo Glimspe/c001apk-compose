@@ -17,10 +17,9 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.wrapContentSize
@@ -102,7 +101,6 @@ import com.example.c001apk.compose.ui.component.MoreMenuButton
 @Composable
 fun FeedScreen(
     modifier: Modifier = Modifier,
-    isCompat: Boolean = true,
     onBackClick: () -> Unit,
     id: String,
     isViewReply: Boolean,
@@ -114,7 +112,7 @@ fun FeedScreen(
 ) {
 
     val viewModel =
-        hiltViewModel<FeedViewModel, FeedViewModel.ViewModelFactory>(key = if (isCompat) id else "KEY") { factory ->
+        hiltViewModel<FeedViewModel, FeedViewModel.ViewModelFactory>(key = id) { factory ->
             factory.create(id, isViewReply)
         }
 
@@ -199,19 +197,9 @@ fun FeedScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                windowInsets = WindowInsets.systemBars
-                    .only(
-                        WindowInsetsSides.Top
-                                + if (isCompat) WindowInsetsSides.Start else WindowInsetsSides.End
-                    ),
                 navigationIcon = {
                     BackButton(
-                        onBackClick = {
-                            if (!isCompat) {
-                                viewModel.resetState()
-                            }
-                            onBackClick()
-                        },
+                        onBackClick = onBackClick,
                     )
                 },
                 title = {
@@ -324,7 +312,6 @@ fun FeedScreen(
         floatingActionButton = {
             if (isLogin && viewModel.feedState is LoadingState.Success) {
                 AnimatedVisibility(
-                    modifier = if (!isCompat) Modifier.navigationBarsPadding() else Modifier,
                     visible = lazyListState.isScrollingUp(),
                     enter = slideInVertically { it * 2 },
                     exit = slideOutVertically { it * 2 }
@@ -352,8 +339,8 @@ fun FeedScreen(
         PullToRefreshBox(
             modifier = Modifier.padding(
                 top = paddingValues.calculateTopPadding(),
-                end = if (isCompat) 0.dp else paddingValues.calculateRightPadding(layoutDirection),
-                start = if (isCompat) paddingValues.calculateLeftPadding(layoutDirection) else 0.dp
+                end = paddingValues.calculateEndPadding(layoutDirection),
+                start = paddingValues.calculateStartPadding(layoutDirection)
             ),
             state = state,
             isRefreshing = viewModel.isRefreshing,

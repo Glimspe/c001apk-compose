@@ -5,28 +5,16 @@ import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.Parcelable
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AllInclusive
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import androidx.navigation.NavType
@@ -104,21 +92,13 @@ fun MainNavigation(
     val context = LocalContext.current
     var initialPage = 0
     var selectIndex by rememberSaveable { mutableIntStateOf(0) }
-    val isCompat by lazy { widthSizeClass == WindowWidthSizeClass.Compact }
-    var compatId by remember { mutableStateOf<String?>(null) }
-    var compatReply by remember { mutableStateOf<Boolean?>(null) }
 
     fun onReport(id: String, type: ReportType) {
         navController.navigateToWebView(getReportUrl(id, type))
     }
 
     fun onViewFeed(viewId: String, isViewReply: Boolean) {
-        if (selectIndex != 2 && !isCompat) {
-            compatId = viewId
-            compatReply = isViewReply
-        } else {
-            navController.navigateToFeed(viewId, isViewReply)
-        }
+        navController.navigateToFeed(viewId, isViewReply)
     }
 
     fun onOpenLink(url:String, title: String?){
@@ -131,9 +111,9 @@ fun MainNavigation(
         }
     }
 
-    Row(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize()) {
         NavHost(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.fillMaxSize(),
             navController = navController,
             startDestination = Router.MAIN.name,
             enterTransition = {
@@ -702,42 +682,6 @@ fun MainNavigation(
                 )
             }
 
-        }
-        if (selectIndex != 2 && !isCompat) {
-            if (compatId.isNullOrEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxSize()
-                        .background(
-                            MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AllInclusive,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.outline,
-                        modifier = Modifier.size(55.dp)
-                    )
-                }
-            } else {
-                FeedScreen(
-                    modifier = Modifier.weight(1f),
-                    isCompat = false,
-                    onBackClick = { compatId = null },
-                    id = compatId.orEmpty(),
-                    isViewReply = compatReply ?: false,
-                    onViewUser = navController::navigateToUser,
-                    onViewFeed = { viewId, viewReply ->
-                        compatId = viewId
-                        compatReply = viewReply
-                    },
-                    onOpenLink = ::onOpenLink,
-                    onCopyText = navController::navigateToCopyText,
-                    onReport = ::onReport,
-                )
-            }
         }
     }
 
