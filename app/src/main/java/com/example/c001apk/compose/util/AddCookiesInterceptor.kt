@@ -46,6 +46,6 @@ object AddCookiesInterceptor : Interceptor {
                 )
             else addHeader("Cookie", SESSID)
         }
-        return chain.proceed(builder.build())
+        return chain.proceed(builder.build().withReplyApiCompatibility())
     }
 }
