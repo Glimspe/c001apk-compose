@@ -6,7 +6,6 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -97,7 +96,8 @@ fun MainNavigation(
     val isCompact = widthSizeClass == WindowWidthSizeClass.Compact
     var selectedFeedId by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedFeedReply by rememberSaveable { mutableStateOf(false) }
-    val showFeedPane = selectIndex != 2 && !isCompact && selectedFeedId != null
+    var isFeedPaneOpen by rememberSaveable { mutableStateOf(false) }
+    val showFeedPane = selectIndex != 2 && !isCompact && isFeedPaneOpen
 
     fun onReport(id: String, type: ReportType) {
         navController.navigateToWebView(getReportUrl(id, type))
@@ -107,6 +107,7 @@ fun MainNavigation(
         if (selectIndex != 2 && !isCompact) {
             selectedFeedId = viewId
             selectedFeedReply = isViewReply
+            isFeedPaneOpen = true
         } else {
             navController.navigateToFeed(viewId, isViewReply)
         }
@@ -122,9 +123,27 @@ fun MainNavigation(
         }
     }
 
-    Row(modifier = Modifier.fillMaxSize()) {
+    FeedSplitLayout(
+        showDetail = showFeedPane,
+        detailContent = {
+            FeedScreen(
+                isCompat = false,
+                onBackClick = { isFeedPaneOpen = false },
+                id = selectedFeedId.orEmpty(),
+                isViewReply = selectedFeedReply,
+                onViewUser = navController::navigateToUser,
+                onViewFeed = { viewId, viewReply ->
+                    selectedFeedId = viewId
+                    selectedFeedReply = viewReply
+                },
+                onOpenLink = ::onOpenLink,
+                onCopyText = navController::navigateToCopyText,
+                onReport = ::onReport,
+            )
+        },
+    ) {
         NavHost(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.fillMaxSize(),
             navController = navController,
             startDestination = Router.MAIN.name,
             enterTransition = {
@@ -694,27 +713,10 @@ fun MainNavigation(
             }
 
         }
-        if (showFeedPane) {
-            FeedScreen(
-                modifier = Modifier.weight(1f),
-                isCompat = false,
-                onBackClick = { selectedFeedId = null },
-                id = selectedFeedId.orEmpty(),
-                isViewReply = selectedFeedReply,
-                onViewUser = navController::navigateToUser,
-                onViewFeed = { viewId, viewReply ->
-                    selectedFeedId = viewId
-                    selectedFeedReply = viewReply
-                },
-                onOpenLink = ::onOpenLink,
-                onCopyText = navController::navigateToCopyText,
-                onReport = ::onReport,
-            )
-        }
     }
 
     BackHandler(enabled = showFeedPane) {
-        selectedFeedId = null
+        isFeedPaneOpen = false
     }
 
 }

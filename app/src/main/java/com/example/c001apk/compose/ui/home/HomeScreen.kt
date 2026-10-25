@@ -7,6 +7,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -81,6 +83,7 @@ import com.example.c001apk.compose.ui.home.topic.HomeTopicScreen
 import com.example.c001apk.compose.util.CookieUtil.isLogin
 import com.example.c001apk.compose.util.ReportType
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.filterNotNull
 
 /**
  * Created by bggRGjQaUbCoE on 2024/6/5
@@ -295,7 +298,13 @@ fun HomeScreen(
 
     val scope = rememberCoroutineScope()
 
-    val storedMenus by viewModel.homeMenus.collectAsStateWithLifecycle(initialValue = emptyList())
+    val menus by viewModel.homeMenus.collectAsStateWithLifecycle()
+    val storedMenus = menus ?: run {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
     val orderedTabs = remember(storedMenus) {
         if (storedMenus.isEmpty()) {
             TabType.entries
@@ -338,7 +347,7 @@ fun HomeScreen(
     var showTabEditor by rememberSaveable { mutableStateOf(false) }
     val selectedTabIndex = pagerState.currentPage.coerceIn(tabList.indices)
 
-    LaunchedEffect(tabList) {
+    LaunchedEffect(pagerState, tabList) {
         val targetType = selectedTabType.takeIf(tabList::contains)
             ?: TabType.FEED.takeIf(tabList::contains)
             ?: tabList.first()
@@ -347,10 +356,10 @@ fun HomeScreen(
         if (pagerState.currentPage != targetIndex) {
             pagerState.scrollToPage(targetIndex)
         }
-    }
-
-    LaunchedEffect(pagerState, tabList) {
-        snapshotFlow { pagerState.settledPage }.collect { page ->
+        // 先按板块名称恢复位置，再记录分页结果，避免旧页码覆盖自定义排序。
+        snapshotFlow {
+            pagerState.settledPage.takeUnless { pagerState.isScrollInProgress }
+        }.filterNotNull().collect { page ->
             tabList.getOrNull(page)?.let { selectedTabType = it }
         }
     }
@@ -390,7 +399,7 @@ fun HomeScreen(
     ) { paddingValues ->
 
         Column(
-            modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
+            modifier = Modifier.fillMaxSize().padding(top = paddingValues.calculateTopPadding()),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -447,7 +456,9 @@ fun HomeScreen(
             HorizontalDivider()
 
             HorizontalPager(
+                modifier = Modifier.weight(1f).fillMaxWidth(),
                 state = pagerState,
+                key = { tabList[it].name },
             ) { index ->
 
                 when (val type = tabList[index]) {

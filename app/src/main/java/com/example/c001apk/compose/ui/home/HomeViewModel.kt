@@ -6,7 +6,8 @@ import com.example.c001apk.compose.logic.model.HomeMenu
 import com.example.c001apk.compose.logic.repository.HomeMenuRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -15,7 +16,11 @@ class HomeViewModel @Inject constructor(
     private val homeMenuRepo: HomeMenuRepo,
 ) : ViewModel() {
 
-    val homeMenus: Flow<List<HomeMenu>> = homeMenuRepo.loadAllListFlow()
+    val homeMenus = homeMenuRepo.loadAllListFlow().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = null,
+    )
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
