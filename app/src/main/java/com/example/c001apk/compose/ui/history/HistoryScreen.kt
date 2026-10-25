@@ -1,5 +1,7 @@
 package com.example.c001apk.compose.ui.history
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -12,12 +14,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ClearAll
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +54,9 @@ import com.example.c001apk.compose.ui.component.cards.HistoryCard
 import com.example.c001apk.compose.ui.component.cards.LoadingCard
 import com.example.c001apk.compose.util.ReportType
 import com.example.c001apk.compose.util.makeToast
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
  * Created by bggRGjQaUbCoE on 2024/6/17
@@ -74,6 +87,13 @@ fun HistoryScreen(
     val layoutDirection = LocalLayoutDirection.current
     val context = LocalContext.current
     var showClearDialog by remember { mutableStateOf(false) }
+    var showBackupMenu by remember { mutableStateOf(false) }
+    val exportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri -> uri?.let(viewModel::exportFavorites) }
+    val importLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri -> uri?.let(viewModel::importFavorites) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -98,13 +118,61 @@ fun HistoryScreen(
                         enter = fadeIn(),
                         exit = fadeOut()
                     ) {
-                        IconButton(onClick = {
-                            showClearDialog = true
-                        }) {
+                        IconButton(
+                            enabled = !viewModel.isBackupBusy,
+                            onClick = { showClearDialog = true }
+                        ) {
                             Icon(imageVector = Icons.Default.ClearAll, contentDescription = null)
                         }
                     }
-
+                    if (type == HistoryType.FAV.name) {
+                        Box {
+                            IconButton(
+                                enabled = !viewModel.isBackupBusy,
+                                onClick = { showBackupMenu = true }
+                            ) {
+                                if (viewModel.isBackupBusy) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(24.dp),
+                                        strokeWidth = 2.dp,
+                                    )
+                                } else {
+                                    Icon(Icons.Default.MoreVert, contentDescription = "收藏备份")
+                                }
+                            }
+                            DropdownMenu(
+                                expanded = showBackupMenu,
+                                onDismissRequest = { showBackupMenu = false },
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("导入收藏") },
+                                    leadingIcon = { Icon(Icons.Default.Download, contentDescription = null) },
+                                    onClick = {
+                                        showBackupMenu = false
+                                        try {
+                                            importLauncher.launch(arrayOf("application/json", "text/plain", "application/octet-stream"))
+                                        } catch (e: Exception) {
+                                            context.makeToast("无法打开文件选择器")
+                                        }
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("导出收藏") },
+                                    leadingIcon = { Icon(Icons.Default.Upload, contentDescription = null) },
+                                    enabled = dataList.isNotEmpty(),
+                                    onClick = {
+                                        showBackupMenu = false
+                                        val date = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.ROOT).format(Date())
+                                        try {
+                                            exportLauncher.launch("c001apk_favorites_$date.json")
+                                        } catch (e: Exception) {
+                                            context.makeToast("无法打开文件选择器")
+                                        }
+                                    },
+                                )
+                            }
+                        }
+                    }
                 }
             )
         },
@@ -184,9 +252,11 @@ fun HistoryScreen(
         }
     }
 
-    viewModel.toastText?.let {
-        context.makeToast(it)
-        viewModel.resetToastText()
+    LaunchedEffect(viewModel.toastText) {
+        viewModel.toastText?.let {
+            context.makeToast(it)
+            viewModel.resetToastText()
+        }
     }
 
 }

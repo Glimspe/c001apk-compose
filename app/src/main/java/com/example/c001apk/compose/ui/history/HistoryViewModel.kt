@@ -1,5 +1,7 @@
 package com.example.c001apk.compose.ui.history
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.compose.runtime.getValue
@@ -7,12 +9,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.example.c001apk.compose.logic.repository.BlackListRepo
 import com.example.c001apk.compose.logic.repository.HistoryFavoriteRepo
+import com.example.c001apk.compose.logic.backup.FavoriteBackup
+import com.example.c001apk.compose.logic.backup.InvalidFavoriteBackupException
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.IOException
 
 /**
  * Created by bggRGjQaUbCoE on 2024/6/17
@@ -21,7 +29,8 @@ import kotlinx.coroutines.launch
 class HistoryViewModel @AssistedInject constructor(
     @Assisted val type: HistoryType = HistoryType.HISTORY,
     private val blackListRepo: BlackListRepo,
-    private val historyFavoriteRepo: HistoryFavoriteRepo
+    private val historyFavoriteRepo: HistoryFavoriteRepo,
+    @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -36,6 +45,43 @@ class HistoryViewModel @AssistedInject constructor(
 
     var toastText by mutableStateOf<String?>(null)
         private set
+
+    var isBackupBusy by mutableStateOf(false)
+        private set
+
+    fun exportFavorites(uri: Uri) = runBackup("导出") {
+        val favorites = historyFavoriteRepo.loadAllFavorites()
+        val output = context.contentResolver.openOutputStream(uri, "wt")
+            ?: throw IOException("Cannot open backup output")
+        output.bufferedWriter(Charsets.UTF_8).use { FavoriteBackup.write(favorites, it) }
+        "已导出 ${favorites.size} 条收藏"
+    }
+
+    fun importFavorites(uri: Uri) = runBackup("导入") {
+        val input = context.contentResolver.openInputStream(uri)
+            ?: throw IOException("Cannot open backup input")
+        val favorites = input.bufferedReader(Charsets.UTF_8).use(FavoriteBackup::read)
+        val imported = historyFavoriteRepo.importFavorites(favorites)
+        "已导入 $imported 条收藏，跳过 ${favorites.size - imported} 条重复记录"
+    }
+
+    private fun runBackup(action: String, operation: suspend () -> String) {
+        if (type != HistoryType.FAV || isBackupBusy) return
+        isBackupBusy = true
+        viewModelScope.launch {
+            try {
+                toastText = withContext(Dispatchers.IO) { operation() }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: InvalidFavoriteBackupException) {
+                toastText = e.message
+            } catch (e: Exception) {
+                toastText = "${action}失败，请检查文件或存储位置后重试"
+            } finally {
+                isBackupBusy = false
+            }
+        }
+    }
 
     fun resetToastText() {
         toastText = null

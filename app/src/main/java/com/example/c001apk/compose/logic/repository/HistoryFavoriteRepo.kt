@@ -72,6 +72,11 @@ class HistoryFavoriteRepo @Inject constructor(
         return feedFavoriteDao.loadAllListFlow()
     }
 
+    suspend fun loadAllFavorites(): List<FeedEntity> = feedFavoriteDao.loadAllList()
+
+    suspend fun importFavorites(favorites: List<FeedEntity>): Int =
+        feedFavoriteDao.insertAllIfAbsent(favorites).count { it != -1L }
+
     suspend fun insertFavorite(favorite: FeedEntity) {
         feedFavoriteDao.insert(favorite)
     }

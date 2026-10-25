@@ -3,6 +3,7 @@ package com.example.c001apk.compose.logic.dao
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.c001apk.compose.logic.model.FeedEntity
 import kotlinx.coroutines.flow.Flow
@@ -13,6 +14,9 @@ interface HistoryFavoriteDao {
 
     @Insert
     suspend fun insert(data: FeedEntity)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertAllIfAbsent(data: List<FeedEntity>): List<Long>
 
     @Query("SELECT * FROM FeedEntity ORDER BY time DESC")
     suspend fun loadAllList(): List<FeedEntity>
