@@ -101,6 +101,7 @@ import com.example.c001apk.compose.ui.component.MoreMenuButton
 @Composable
 fun FeedScreen(
     modifier: Modifier = Modifier,
+    isCompat: Boolean = true,
     onBackClick: () -> Unit,
     id: String,
     isViewReply: Boolean,
@@ -112,7 +113,7 @@ fun FeedScreen(
 ) {
 
     val viewModel =
-        hiltViewModel<FeedViewModel, FeedViewModel.ViewModelFactory>(key = id) { factory ->
+        hiltViewModel<FeedViewModel, FeedViewModel.ViewModelFactory>(key = if (isCompat) id else "KEY") { factory ->
             factory.create(id, isViewReply)
         }
 
