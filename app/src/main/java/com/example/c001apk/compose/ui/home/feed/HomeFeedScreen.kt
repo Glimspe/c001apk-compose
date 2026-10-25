@@ -1,5 +1,7 @@
 package com.example.c001apk.compose.ui.home.feed
 
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
@@ -25,7 +27,7 @@ fun HomeFeedScreen(
     onOpenLink: (String, String?) -> Unit,
     onCopyText: (String?) -> Unit,
     onReport: (String, ReportType) -> Unit,
-    isScrollingUp: ((Boolean) -> Unit)? = null,
+    lazyListState: LazyListState = rememberLazyListState(),
 ) {
 
     val context = LocalContext.current
@@ -89,7 +91,7 @@ fun HomeFeedScreen(
         onOpenLink = onOpenLink,
         onCopyText = onCopyText,
         onReport = onReport,
-        isScrollingUp = isScrollingUp,
+        lazyListState = lazyListState,
     )
 
     viewModel.toastText?.let {

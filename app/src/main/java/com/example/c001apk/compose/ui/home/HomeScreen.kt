@@ -1,9 +1,6 @@
 package com.example.c001apk.compose.ui.home
 
 import android.content.Intent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
@@ -25,12 +22,10 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -79,6 +74,7 @@ import com.example.c001apk.compose.ui.component.rememberHapticClick
 import com.example.c001apk.compose.ui.feed.reply.ReplyActivity
 import com.example.c001apk.compose.ui.home.app.AppListScreen
 import com.example.c001apk.compose.ui.home.feed.HomeFeedScreen
+import com.example.c001apk.compose.ui.home.feed.HomeFeedActions
 import com.example.c001apk.compose.ui.home.topic.HomeTopicScreen
 import com.example.c001apk.compose.util.CookieUtil.isLogin
 import com.example.c001apk.compose.util.ReportType
@@ -297,6 +293,7 @@ fun HomeScreen(
 ) {
 
     val scope = rememberCoroutineScope()
+    val homeFeedListState = rememberLazyListState()
 
     val menus by viewModel.homeMenus.collectAsStateWithLifecycle()
     val storedMenus = menus ?: run {
@@ -343,7 +340,6 @@ fun HomeScreen(
         }
     )
     val context = LocalContext.current
-    var isScrollingUp by remember { mutableStateOf(false) }
     var showTabEditor by rememberSaveable { mutableStateOf(false) }
     val selectedTabIndex = pagerState.currentPage.coerceIn(tabList.indices)
 
@@ -367,31 +363,21 @@ fun HomeScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         floatingActionButton = {
-            if (isLogin && tabList.getOrNull(selectedTabIndex) == TabType.FEED) {
-                AnimatedVisibility(
-                    visible = isScrollingUp,
-                    enter = slideInVertically { it * 2 },
-                    exit = slideOutVertically { it * 2 }
-                ) {
-                    FloatingActionButton(
-                        onClick = rememberHapticClick {
-                            val intent = Intent(context, ReplyActivity::class.java)
-                            intent.putExtra("type", "createFeed")
-                            val animationBundle = ActivityOptionsCompat.makeCustomAnimation(
-                                context,
-                                R.anim.anim_bottom_sheet_slide_up,
-                                R.anim.anim_bottom_sheet_slide_down
-                            ).toBundle()
-                            ContextCompat.startActivity(context, intent, animationBundle)
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = null
-                        )
-                    }
-                }
-            }
+            HomeFeedActions(
+                listState = homeFeedListState,
+                isActive = tabList.getOrNull(selectedTabIndex) == TabType.FEED,
+                canPublish = isLogin,
+                onPublish = {
+                    val intent = Intent(context, ReplyActivity::class.java)
+                    intent.putExtra("type", "createFeed")
+                    val animationBundle = ActivityOptionsCompat.makeCustomAnimation(
+                        context,
+                        R.anim.anim_bottom_sheet_slide_up,
+                        R.anim.anim_bottom_sheet_slide_down
+                    ).toBundle()
+                    ContextCompat.startActivity(context, intent, animationBundle)
+                },
+            )
         },
         contentWindowInsets = ScaffoldDefaults
             .contentWindowInsets
@@ -472,9 +458,8 @@ fun HomeScreen(
                             onOpenLink = onOpenLink,
                             onCopyText = onCopyText,
                             onReport = onReport,
-                            isScrollingUp = {
-                                isScrollingUp = it
-                            }
+                            lazyListState = if (type == TabType.FEED) homeFeedListState
+                                else rememberLazyListState(),
                         )
 
                     TabType.APP -> AppListScreen(
