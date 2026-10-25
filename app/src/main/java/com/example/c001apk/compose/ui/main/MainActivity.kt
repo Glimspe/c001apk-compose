@@ -15,9 +15,10 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
@@ -70,31 +71,34 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var userPreferencesRepository: UserPreferencesRepository
-    private lateinit var navController: NavHostController
+    private val pendingDeepLinks = mutableStateListOf<String>()
     private val viewModel by viewModels<MainViewModel>()
     private val searchViewModel by viewModels<SearchViewModel>()
     private var stableStatusBarInset: Int? = null
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        handleIntent(intent)
+        setIntent(intent)
+        enqueueDeepLink(intent)
     }
 
-    private fun handleIntent(intent: Intent) {
-        intent.data?.let {
-            navController.onOpenLink(
-                context = this,
-                url = it.toString(),
-                title = null,
-                needConvert = true,
-                onSearch = searchViewModel::saveHistory
-            )
-        }
+    private fun enqueueDeepLink(intent: Intent) {
+        intent.dataString?.let(pendingDeepLinks::add)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putStringArrayList(PENDING_DEEP_LINKS, ArrayList(pendingDeepLinks))
     }
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (savedInstanceState == null) {
+            enqueueDeepLink(intent)
+        } else {
+            pendingDeepLinks.addAll(savedInstanceState.getStringArrayList(PENDING_DEEP_LINKS).orEmpty())
+        }
         enableEdgeToEdge()
         setupStableStatusBarInsets()
 
@@ -103,7 +107,7 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            navController = rememberNavController()
+            val navController = rememberNavController()
 
             // 窗口重新获得焦点时，Compose 会把焦点补到第一个可聚焦节点上，
             // 导致左上角按钮/Tab 长时间显示 Focus 高亮（看起来像被按住）。
@@ -184,9 +188,20 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            LaunchedEffect(key1 = navController) {
-                if (savedInstanceState == null) {
-                    handleIntent(intent)
+            LaunchedEffect(navController) {
+                // 冷启动的新 Intent 可能早于首次组合，等导航图就绪后再消费链接。
+                navController.currentBackStackEntryFlow.first()
+                snapshotFlow { pendingDeepLinks.toList() }.collect { links ->
+                    links.forEach { url ->
+                        navController.onOpenLink(
+                            context = this@MainActivity,
+                            url = url,
+                            title = null,
+                            needConvert = true,
+                            onSearch = searchViewModel::saveHistory,
+                        )
+                        pendingDeepLinks.removeAt(0)
+                    }
                 }
             }
 
@@ -215,5 +230,9 @@ class MainActivity : ComponentActivity() {
     private fun fallbackStatusBarHeight(): Int {
         val resId = resources.getIdentifier("status_bar_height", "dimen", "android")
         return if (resId > 0) resources.getDimensionPixelSize(resId) else 0
+    }
+
+    private companion object {
+        const val PENDING_DEEP_LINKS = "pendingDeepLinks"
     }
 }
