@@ -58,6 +58,7 @@ fun MainScreen(
     onViewBlackList: (String) -> Unit,
     onViewHistory: (String) -> Unit,
     widthSizeClass: WindowWidthSizeClass,
+    isActive: Boolean = true,
 ) {
 
     val screens = listOf(
@@ -181,7 +182,7 @@ fun MainScreen(
         }
     }
 
-    BackHandler(enabled = selectIndex != 0) {
+    BackHandler(enabled = isActive && selectIndex != 0) {
         setSelectIndex(0)
     }
 

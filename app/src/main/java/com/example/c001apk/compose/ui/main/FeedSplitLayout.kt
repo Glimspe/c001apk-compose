@@ -15,6 +15,7 @@ import kotlin.math.roundToInt
 internal fun FeedSplitLayout(
     showDetail: Boolean,
     detailContent: @Composable () -> Unit,
+    mainBackground: @Composable () -> Unit = {},
     mainContent: @Composable () -> Unit,
 ) {
     val transition = updateTransition(showDetail, label = "feed-split")
@@ -27,7 +28,10 @@ internal fun FeedSplitLayout(
     Layout(
         modifier = Modifier.fillMaxSize().clipToBounds(),
         content = {
-            Box(modifier = Modifier.fillMaxSize()) { mainContent() }
+            Box(modifier = Modifier.fillMaxSize()) {
+                mainBackground()
+                mainContent()
+            }
             if (keepDetail) {
                 Box(modifier = Modifier.fillMaxSize()) { detailContent() }
             }

@@ -22,6 +22,7 @@ import androidx.navigation.NavType
 import androidx.navigation.Navigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.example.c001apk.compose.constant.Constants.CHANNEL
 import com.example.c001apk.compose.constant.Constants.EMPTY_STRING
@@ -97,6 +98,7 @@ fun MainNavigation(
     var selectedFeedId by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedFeedReply by rememberSaveable { mutableStateOf(false) }
     var isFeedPaneOpen by rememberSaveable { mutableStateOf(false) }
+    var feedPaneOwnerId by rememberSaveable { mutableStateOf<String?>(null) }
     val showFeedPane = selectIndex != 2 && !isCompact && isFeedPaneOpen
 
     fun onReport(id: String, type: ReportType) {
@@ -107,6 +109,7 @@ fun MainNavigation(
         if (selectIndex != 2 && !isCompact) {
             selectedFeedId = viewId
             selectedFeedReply = isViewReply
+            feedPaneOwnerId = navController.currentBackStackEntry?.id
             isFeedPaneOpen = true
         } else {
             navController.navigateToFeed(viewId, isViewReply)
@@ -125,43 +128,10 @@ fun MainNavigation(
 
     FeedSplitLayout(
         showDetail = showFeedPane,
-        detailContent = {
-            FeedScreen(
-                isCompat = false,
-                onBackClick = { isFeedPaneOpen = false },
-                id = selectedFeedId.orEmpty(),
-                isViewReply = selectedFeedReply,
-                onViewUser = navController::navigateToUser,
-                onViewFeed = { viewId, viewReply ->
-                    selectedFeedId = viewId
-                    selectedFeedReply = viewReply
-                },
-                onOpenLink = ::onOpenLink,
-                onCopyText = navController::navigateToCopyText,
-                onReport = ::onReport,
-            )
-        },
-    ) {
-        NavHost(
-            modifier = Modifier.fillMaxSize(),
-            navController = navController,
-            startDestination = Router.MAIN.name,
-            enterTransition = {
-                SlideTransition.slideLeft.enterTransition()
-            },
-            exitTransition = {
-                SlideTransition.slideLeft.exitTransition()
-            },
-            popEnterTransition = {
-                SlideTransition.slideRight.enterTransition()
-            },
-            popExitTransition = {
-                SlideTransition.slideRight.exitTransition()
-            }
-        ) {
-
-            composable(route = Router.MAIN.name) {
+        mainBackground = {
+            RetainedMainScreen(navController) { isActive ->
                 MainScreen(
+                    isActive = isActive,
                     selectIndex = selectIndex,
                     setSelectIndex = {
                         selectIndex = it
@@ -201,6 +171,44 @@ fun MainNavigation(
                     onViewHistory = navController::navigateToHistory,
                 )
             }
+        },
+        detailContent = {
+            FeedScreen(
+                isCompat = false,
+                onBackClick = { isFeedPaneOpen = false },
+                id = selectedFeedId.orEmpty(),
+                isViewReply = selectedFeedReply,
+                onViewUser = navController::navigateToUser,
+                onViewFeed = { viewId, viewReply ->
+                    selectedFeedId = viewId
+                    selectedFeedReply = viewReply
+                },
+                onOpenLink = ::onOpenLink,
+                onCopyText = navController::navigateToCopyText,
+                onReport = ::onReport,
+            )
+        },
+    ) {
+        NavHost(
+            modifier = Modifier.fillMaxSize(),
+            navController = navController,
+            startDestination = Router.MAIN.name,
+            enterTransition = {
+                SlideTransition.slideLeft.enterTransition()
+            },
+            exitTransition = {
+                SlideTransition.slideLeft.exitTransition()
+            },
+            popEnterTransition = {
+                SlideTransition.slideRight.enterTransition()
+            },
+            popExitTransition = {
+                SlideTransition.slideRight.exitTransition()
+            }
+        ) {
+
+            // 主界面保留在 mainBackground 中，此处仅保留导航栈入口。
+            composable(route = Router.MAIN.name) {}
 
             composable(route = Router.PARAMS.name) {
                 ParamsScreen(
@@ -715,10 +723,22 @@ fun MainNavigation(
         }
     }
 
-    BackHandler(enabled = showFeedPane) {
+    FeedPaneBackHandler(navController, showFeedPane, feedPaneOwnerId) {
         isFeedPaneOpen = false
     }
 
+}
+
+@Composable
+private fun FeedPaneBackHandler(
+    navController: NavHostController,
+    showFeedPane: Boolean,
+    ownerId: String?,
+    onClose: () -> Unit,
+) {
+    val currentEntry by navController.currentBackStackEntryAsState()
+    val activeEntry = currentEntry ?: navController.currentBackStackEntry
+    BackHandler(enabled = showFeedPane && activeEntry?.id == ownerId, onBack = onClose)
 }
 
 fun NavHostController.onOpenLink(

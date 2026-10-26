@@ -17,11 +17,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.VerticalAlignTop
+import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +45,8 @@ internal fun HomeFeedActions(
     val scrollingUp = listState.isScrollingUp()
     val canScrollToTop = listState.canScrollBackward
     var returningToTop by remember { mutableStateOf(false) }
+    val buttonColor = MaterialTheme.colorScheme.primaryContainer
+    val iconColor = MaterialTheme.colorScheme.onPrimaryContainer
 
     AnimatedVisibility(
         visible = isActive && scrollingUp && (canPublish || canScrollToTop),
@@ -66,9 +67,10 @@ internal fun HomeFeedActions(
                 exit = fadeOut(tween(120)) + scaleOut(targetScale = 0.8f) +
                     shrinkVertically(shrinkTowards = Alignment.Bottom),
             ) {
-                SmallFloatingActionButton(
+                FloatingActionButton(
                     modifier = Modifier.padding(bottom = if (canPublish) 12.dp else 0.dp),
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    containerColor = buttonColor,
+                    contentColor = iconColor,
                     onClick = rememberHapticClick {
                         if (!returningToTop) {
                             returningToTop = true
@@ -82,11 +84,15 @@ internal fun HomeFeedActions(
                         }
                     },
                 ) {
-                    Icon(Icons.Default.VerticalAlignTop, contentDescription = "回到顶部")
+                    Icon(Icons.Rounded.ArrowUpward, contentDescription = "回到顶部")
                 }
             }
             if (canPublish) {
-                FloatingActionButton(onClick = rememberHapticClick(onClick = onPublish)) {
+                FloatingActionButton(
+                    containerColor = buttonColor,
+                    contentColor = iconColor,
+                    onClick = rememberHapticClick(onClick = onPublish),
+                ) {
                     Icon(Icons.Default.Add, contentDescription = "发布动态")
                 }
             }
