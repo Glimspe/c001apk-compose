@@ -33,5 +33,5 @@ jobs:
     - name: Upload build artifact
       uses: actions/upload-artifact@v4
       with:
-        name: c001apk-compose-debug
+        name: c001apk-Revived-debug
         path: app/build/outputs/apk/debug/*.apk

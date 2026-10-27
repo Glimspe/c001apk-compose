@@ -87,7 +87,7 @@ fun AboutScreen(
             BasicListItem(
                 leadingImageVector = Icons.Outlined.AllInclusive,
                 headlineText = stringResource(id = R.string.app_name),
-                supportingText = "c001apk Revived"
+                supportingText = "持续维护的酷安第三方客户端"
             ) { }
             BasicListItem(
                 leadingImageVector = Icons.Default.ErrorOutline,

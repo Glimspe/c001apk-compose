@@ -30,5 +30,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "c001apk-compose"
+rootProject.name = "c001apk-Revived"
 include(":app", ":mojito", ":SketchImageViewLoader", ":media-support")

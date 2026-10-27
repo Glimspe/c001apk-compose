@@ -159,9 +159,9 @@ android {
 
     applicationVariants.configureEach {
         outputs.configureEach {
-            if (baseName == "release")
-                (this as? ApkVariantOutputImpl)?.outputFileName =
-                    "c001apk-compose_$versionName($versionCode).apk"
+            val buildSuffix = if (baseName == "release") "" else "-$baseName"
+            (this as? ApkVariantOutputImpl)?.outputFileName =
+                "c001apk-Revived_$versionName($versionCode)$buildSuffix.apk"
         }
     }
 }
