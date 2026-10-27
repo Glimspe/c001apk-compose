@@ -7,11 +7,19 @@
 <p>基于 Jetpack Compose 的酷安第三方客户端</p>
 
 <p>
-  <img src="https://img.shields.io/badge/Android-7.0%2B-3DDC84?logo=android&logoColor=white" alt="Android 7.0+">
+  <a href="https://t.me/c001apk_revived"><img src="https://img.shields.io/badge/Telegram-Channel-26A5E4?style=for-the-badge&amp;logo=telegram&amp;logoColor=white" alt="Telegram 频道：@c001apk_revived"></a>
+</p>
+
+<p>
+  <a href="https://github.com/frisk1127/c001apk-Revived/stargazers"><img src="https://img.shields.io/github/stars/frisk1127/c001apk-Revived?style=flat&amp;logo=github&amp;label=Stars&amp;color=e3b341" alt="GitHub Stars"></a>
+  <a href="https://github.com/frisk1127/c001apk-Revived/releases"><img src="https://img.shields.io/github/downloads/frisk1127/c001apk-Revived/total?label=Downloads&amp;color=2da44e" alt="累计下载量"></a>
+  <a href="https://github.com/frisk1127/c001apk-Revived/releases"><img src="https://img.shields.io/github/v/release/frisk1127/c001apk-Revived?include_prereleases&amp;sort=date&amp;label=Release&amp;color=4f8cc9" alt="最新版本（含预发布版）"></a>
+  <img src="https://img.shields.io/badge/Android-7.0%2B-3DDC84?logo=android&amp;logoColor=white" alt="Android 7.0+">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue" alt="AGPL-3.0"></a>
 </p>
 
 <p>
+  <a href="https://t.me/c001apk_revived">Telegram 频道</a> ·
   <a href="https://github.com/frisk1127/c001apk-Revived/releases">下载应用</a> ·
   <a href="CHANGELOG.md">更新日志</a> ·
   <a href="https://github.com/frisk1127/c001apk-Revived/issues">问题反馈</a>
@@ -38,6 +46,8 @@
 ## 下载
 
 前往 [Releases](https://github.com/frisk1127/c001apk-Revived/releases) 下载，支持 **Android 7.0 及以上**。日常使用建议选择稳定版，想提前体验新功能可以选择预发布版。各版本的具体变化见 [更新日志](CHANGELOG.md)。
+
+版本更新与项目消息可关注 [Telegram 频道 @c001apk_revived](https://t.me/c001apk_revived)。
 
 从旧版 c001apk-compose 升级时，同签名且版本号不低于已安装版本的安装包可直接覆盖安装，保留原有数据。收藏备份入口位于 **消息 → 本地收藏 → 右上角菜单**。
 
