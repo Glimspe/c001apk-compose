@@ -1,6 +1,5 @@
 package com.example.c001apk.compose.ui.settings
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,15 +25,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.res.ResourcesCompat
 import com.example.c001apk.compose.BuildConfig
 import com.example.c001apk.compose.R
 import com.example.c001apk.compose.constant.Constants.URL_SOURCE_CODE
 import com.example.c001apk.compose.constant.Constants.URL_SOURCE_CODE_FORK
 import com.example.c001apk.compose.ui.component.BackButton
+import com.example.c001apk.compose.ui.component.LauncherIconImage
 import com.example.c001apk.compose.ui.component.settings.BasicListItem
 import com.example.c001apk.compose.util.openInBrowser
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
 
 /**
  * Created by bggRGjQaUbCoE on 2024/6/2
@@ -72,16 +70,7 @@ fun AboutScreen(
                     .height(125.dp)
                     .align(Alignment.CenterHorizontally)
             ) {
-                val drawable = ResourcesCompat.getDrawable(
-                    context.resources,
-                    R.mipmap.ic_launcher,
-                    context.theme
-                )
-                Image(
-                    painter = rememberDrawablePainter(drawable),
-                    contentDescription = null,
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                LauncherIconImage(Modifier.align(Alignment.Center))
             }
             HorizontalDivider()
             BasicListItem(

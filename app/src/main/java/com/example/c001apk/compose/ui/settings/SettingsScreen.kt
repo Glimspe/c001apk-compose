@@ -1,7 +1,6 @@
 package com.example.c001apk.compose.ui.settings
 
 import android.os.Build
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -74,7 +73,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.core.content.res.ResourcesCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.c001apk.compose.BuildConfig
 import com.example.c001apk.compose.FollowType
@@ -87,6 +85,7 @@ import com.example.c001apk.compose.logic.model.HapticStrength
 import com.example.c001apk.compose.logic.providable.LocalUserPreferences
 import com.example.c001apk.compose.ui.blacklist.BlackListType
 import com.example.c001apk.compose.ui.component.HtmlText
+import com.example.c001apk.compose.ui.component.LauncherIconImage
 import com.example.c001apk.compose.ui.component.MoreMenuButton
 import com.example.c001apk.compose.ui.component.rememberHapticClick
 import com.example.c001apk.compose.ui.component.icons.Swatch
@@ -100,7 +99,7 @@ import com.example.c001apk.compose.util.CacheDataManager.getTotalCacheSize
 import com.example.c001apk.compose.util.TokenDeviceUtils.encode
 import com.example.c001apk.compose.util.Utils.randomMacAddress
 import com.example.c001apk.compose.util.openInBrowser
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
+import com.example.c001apk.compose.util.makeToast
 import com.materialkolor.PaletteStyle
 import java.util.Formatter
 
@@ -134,6 +133,7 @@ fun SettingsScreen(
     var showImageQualityDialog by remember { mutableStateOf(false) }
     var showCleanCacheDialog by remember { mutableStateOf(false) }
     var showThemeTypeDialog by remember { mutableStateOf(false) }
+    var showLauncherIconDialog by remember { mutableStateOf(false) }
     var showHapticStrengthDialog by remember { mutableStateOf(false) }
     var cacheSize by remember { mutableStateOf(getTotalCacheSize(context)) }
     val showHapticStrengthDialogClick = rememberHapticClick {
@@ -202,6 +202,16 @@ fun SettingsScreen(
             }
 
             BasicListItem(leadingText = "主题")
+            BasicListItem(
+                leadingImageVector = Icons.Outlined.Image,
+                headlineText = stringResource(R.string.app_icon),
+                supportingText = stringResource(viewModel.launcherIcon.labelRes),
+                trailingContent = {
+                    LauncherIconImage(Modifier.size(40.dp), viewModel.launcherIcon)
+                },
+            ) {
+                showLauncherIconDialog = true
+            }
             SwitchListItem(
                 value = prefs.materialYou,
                 leadingImageVector = Icons.Outlined.Palette,
@@ -419,6 +429,26 @@ fun SettingsScreen(
         }
 
         when {
+            showLauncherIconDialog -> {
+                LauncherIconDialog(
+                    current = viewModel.launcherIcon,
+                    isApplying = viewModel.isChangingIcon,
+                    onDismiss = { showLauncherIconDialog = false },
+                    onConfirm = { icon ->
+                        if (icon == viewModel.launcherIcon) {
+                            showLauncherIconDialog = false
+                        } else {
+                            viewModel.setLauncherIcon(icon) { success ->
+                                if (success) showLauncherIconDialog = false
+                                context.makeToast(context.getString(
+                                    if (success) R.string.icon_changed else R.string.icon_change_failed
+                                ))
+                            }
+                        }
+                    },
+                )
+            }
+
             showAboutDialog -> {
                 AboutDialog {
                     showAboutDialog = false
@@ -778,16 +808,7 @@ fun AboutDialog(onDismiss: () -> Unit) {
                     .fillMaxWidth()
                     .padding(24.dp)
             ) {
-                val drawable = ResourcesCompat.getDrawable(
-                    context.resources,
-                    R.mipmap.ic_launcher,
-                    context.theme
-                )
-                Image(
-                    painter = rememberDrawablePainter(drawable),
-                    contentDescription = "icon",
-                    modifier = Modifier.size(40.dp)
-                )
+                LauncherIconImage(Modifier.size(40.dp))
 
                 Spacer(modifier = Modifier.width(12.dp))
 

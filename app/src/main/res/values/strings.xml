@@ -3,6 +3,12 @@
     <string name="home">首页</string>
     <string name="message">消息</string>
     <string name="settings">设置</string>
+    <string name="app_icon">应用图标</string>
+    <string name="icon_revived">Revived</string>
+    <string name="icon_classic">原版</string>
+    <string name="icon_theme_hint">两种图标均跟随系统取色</string>
+    <string name="icon_changed">图标已切换，桌面可能需要稍等片刻刷新</string>
+    <string name="icon_change_failed">图标切换失败，请重试</string>
     <string name="about_source_code"><![CDATA[原仓库 : %1$s]]></string>
     <string name="about_source_code_fork"><![CDATA[本仓库 : %1$s]]></string>
     <string name="theme_type_default">默认</string>

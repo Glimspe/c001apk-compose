@@ -1,5 +1,8 @@
 package com.example.c001apk.compose.ui.settings
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import com.example.c001apk.compose.FollowType
 import com.example.c001apk.compose.ThemeMode
@@ -7,8 +10,12 @@ import com.example.c001apk.compose.ThemeType
 import com.example.c001apk.compose.logic.model.HapticStrength
 import com.example.c001apk.compose.logic.repository.UserPreferencesRepository
 import com.example.c001apk.compose.ui.base.PrefsViewModel
+import com.example.c001apk.compose.util.LauncherIcon
+import com.example.c001apk.compose.util.LauncherIconManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
@@ -16,8 +23,30 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val userPreferencesRepository: UserPreferencesRepository
+    private val userPreferencesRepository: UserPreferencesRepository,
+    private val launcherIconManager: LauncherIconManager,
 ) : PrefsViewModel(userPreferencesRepository) {
+
+    var launcherIcon by mutableStateOf(launcherIconManager.current)
+        private set
+    var isChangingIcon by mutableStateOf(false)
+        private set
+
+    fun setLauncherIcon(icon: LauncherIcon, onResult: (Boolean) -> Unit) {
+        if (isChangingIcon) return
+        isChangingIcon = true
+        viewModelScope.launch {
+            try {
+                val changed = withContext(Dispatchers.IO) {
+                    runCatching { launcherIconManager.select(icon) }.isSuccess
+                }
+                launcherIcon = launcherIconManager.current
+                onResult(changed)
+            } finally {
+                isChangingIcon = false
+            }
+        }
+    }
 
     fun setDarkTheme(value: ThemeMode) {
         viewModelScope.launch {

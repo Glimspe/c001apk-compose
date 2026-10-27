@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="app/src/main/ic_launcher-playstore.png" width="96" alt="c001apk-Revived 图标">
+<img src="app/src/main/ic_launcher-revived.svg" width="96" alt="c001apk-Revived 图标">
 
 <h1>c001apk-Revived</h1>
 
@@ -31,7 +31,7 @@
 - **发布与回复** — 支持选择 `@` 用户、`#` 话题和系统相册图片，评论中展示回复对象头像与回复关系。
 - **本地收藏** — 收藏与浏览历史；支持将收藏导出为 JSON 备份，导入时自动合并去重，保留收藏时间。
 - **搜索与跳转** — 站内搜索与搜索历史，支持通过酷安帖子链接和搜索链接直接打开对应页面。
-- **主题与触感** — Material You 动态取色、自定义主题、深色与纯黑模式、字体和内容缩放；触觉反馈可开关、调节强度并预览。
+- **主题与触感** — Material You 动态取色、自定义主题、深色与纯黑模式、字体和内容缩放；可切换 Revived／原版图标，均支持系统取色；触觉反馈可开关、调节强度并预览。
 
 > Ultra HDR 需要 Android 14 及以上和兼容设备；实况播放需要图片附带视频数据。
 
