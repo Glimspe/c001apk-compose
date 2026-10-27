@@ -751,14 +751,22 @@ fun NavHostController.onOpenLink(
     needConvert: Boolean = false,
     onSearch: ((String) -> Unit)? = null,
     onViewFeed: ((String, Boolean) -> Unit)? = null,
-) {
+) {    
     if (url.isEmpty())
         return
     val path = with(url.decode) {
         if (needConvert) {
-            if (this.startsWith(PREFIX_COOLMARKET))
-                this.replaceFirst(PREFIX_COOLMARKET, "/")
-            else {
+            if (this.startsWith(PREFIX_COOLMARKET)) {
+                val rest = this.removePrefix(PREFIX_COOLMARKET)
+                when {
+                    rest.startsWith("/") -> rest
+                    rest.substringBefore('/') in setOf(
+                        "coolapk.com", "www.coolapk.com", "m.coolapk.com",
+                        "coolapk1s.com", "www.coolapk1s.com"
+                    ) -> "/" + rest.substringAfter('/')
+                    else -> "/$rest"
+                }
+            } else {
                 val uri = Uri.parse(this)
                 if (uri.host?.contains(CHANNEL) == true)
                     uri.path ?: url
