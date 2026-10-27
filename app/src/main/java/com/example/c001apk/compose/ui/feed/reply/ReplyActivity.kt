@@ -512,6 +512,7 @@ class ReplyActivity : AppCompatActivity(),
 
         pickContent =
             registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+                animateExternalActivityReturnIfPending()
                 uri?.let {
                     handlePickedUris(listOf(it))
                 }
@@ -1160,11 +1161,13 @@ class ReplyActivity : AppCompatActivity(),
     private fun launchPick() {
         launchAfterImeHidden {
             try {
+                pendingExternalReturn = true
                 pickContent.launch(
                     PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
                     createStationaryBackgroundOptions()
                 )
             } catch (e: ActivityNotFoundException) {
+                pendingExternalReturn = false
                 makeToast("Activity Not Found")
                 e.printStackTrace()
             }
