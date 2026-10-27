@@ -1,45 +1,54 @@
-# c001apk-Revived
+<div align="center">
 
-基于 [bggRGjQaUbCoE/c001apk-compose](https://github.com/bggRGjQaUbCoE/c001apk-compose) 持续维护的 Android 酷安第三方客户端，重点改进接口兼容、富媒体浏览、首页管理和回复体验。
+<img src="app/src/main/ic_launcher-playstore.png" width="96" alt="c001apk-Revived 图标">
 
-[下载版本](https://github.com/frisk1127/c001apk-Revived/releases) · [更新日志](CHANGELOG.md) · [反馈问题](https://github.com/frisk1127/c001apk-Revived/issues)
+<h1>c001apk-Revived</h1>
 
-## 相比上游增加了什么
+<p>基于 Jetpack Compose 的酷安第三方客户端</p>
 
-对比基线为上游 `main` 的 [`d44c471f`](https://github.com/bggRGjQaUbCoE/c001apk-compose/commit/d44c471fb38fa600d28fa33b5dd7fcfd6abb7197)（2024-09-16）。下表描述当前 `dev` 分支，已发布版本的功能以对应 Release 说明为准。
+<p>
+  <img src="https://img.shields.io/badge/Android-7.0%2B-3DDC84?logo=android&logoColor=white" alt="Android 7.0+">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue" alt="AGPL-3.0"></a>
+</p>
 
-| 方向 | 上游已有能力 | 本分支新增或改进 |
-| --- | --- | --- |
-| 首页 | 信息流和多个首页板块 | 板块显示开关、拖动排序及配置保存；发布按钮上方增加带动画的回顶按钮 |
-| 本地收藏 | 收藏和浏览历史 | JSON 备份导出、导入合并去重、保留收藏时间；导入前完整校验，已有记录不被覆盖 |
-| 实况与 HDR 图片 | 常规图片与 GIF 浏览 | 实况图片识别、播放、声音开关、重播及保存；Ultra HDR 图片显示与标识 |
-| 图片查看与保存 | 图片预览、缩放和保存 | 修复多处长按、缩放、翻页、黑屏和缓存问题；GIF 保存原始数据；优化状态栏、弹窗取色和进出动画 |
-| 产品参数 | 产品页面与相关信息流 | 原生配置列表、同机型配置比较，以及最多 10 项配置的跨机型对比 |
-| 酷安众测 | 常规链接跳转 | 原生众测详情、报名须知、活动规则及报名入口 |
-| 发布与回复 | 文字、图片、表情输入及评论列表 | `@` 用户和 `#` 话题选择；回复对象头像及关系展示；系统图片选择器、其他媒体入口与输入面板动画改进 |
-| 搜索与外部链接 | 站内搜索和链接跳转 | 支持 `coolmarket` 搜索链接及编码关键词；修复通过帖子链接冷启动时的崩溃 |
-| 横屏与返回 | 宽屏列表／详情双栏 | 首页先占满可用宽度，打开动态后左右各半，关闭后恢复；增加分栏过渡并改善返回动画和 Tab 状态恢复 |
-| 触觉与中文体验 | 基础交互和主题设置 | 可开关的触觉反馈、系统触感、自定义强度与预览、机型兼容选项；补全多处中文菜单和操作结果提示 |
-| 接口兼容 | 原有酷安接口接入 | 修复评论读取、应用更新响应解析等兼容问题；评论使用独立的版本请求头，保留其他页面的参数 |
+<p>
+  <a href="https://github.com/frisk1127/c001apk-Revived/releases">下载应用</a> ·
+  <a href="CHANGELOG.md">更新日志</a> ·
+  <a href="https://github.com/frisk1127/c001apk-Revived/issues">问题反馈</a>
+</p>
 
-Material You 动态取色、暗色／纯黑主题、自定义主题和调色板、字体与内容缩放、私信、黑名单等基础能力继续沿用上游。
+</div>
 
-Ultra HDR 显示需要 Android 14 及以上，并取决于设备和图片本身的支持情况。实况图片的可用功能也取决于原始媒体是否提供对应视频数据。
+在 [c001apk-compose](https://github.com/bggRGjQaUbCoE/c001apk-compose) 的基础上继续维护，支持动态浏览、图文发布、评论回复、消息与私信，并加入实况图片、HDR 显示、产品参数对比和收藏备份等功能。
 
-[查看与上游基线的完整差异](https://github.com/frisk1127/c001apk-Revived/compare/d44c471f...dev)
+## 功能
 
-## 下载与升级
+- **实况与 HDR 图片** — 支持实况图片播放、声音开关、重播与保存，以及 Ultra HDR 图片显示。
+- **图片浏览** — 全屏预览、手势缩放、滑动切换与长按保存，支持保存原始 GIF。
+- **产品参数** — 原生参数页面，支持同机型不同配置和跨机型对比，最多同时比较 10 组配置。
+- **原生众测** — 在应用内查看众测详情、活动规则和报名须知，并进入报名页面。
+- **首页与横屏** — 自定义首页板块显示与顺序，支持一键回顶；横屏首页全宽显示，打开详情后切换为左右双栏。
+- **发布与回复** — 支持选择 `@` 用户、`#` 话题和系统相册图片，评论中展示回复对象头像与回复关系。
+- **本地收藏** — 收藏与浏览历史；支持将收藏导出为 JSON 备份，导入时自动合并去重，保留收藏时间。
+- **搜索与跳转** — 站内搜索与搜索历史，支持通过酷安帖子链接和搜索链接直接打开对应页面。
+- **主题与触感** — Material You 动态取色、自定义主题、深色与纯黑模式、字体和内容缩放；触觉反馈可开关、调节强度并预览。
 
-- 基本运行要求：Android 7.0（API 24）及以上。
-- 稳定版和预发布版在 [Releases](https://github.com/frisk1127/c001apk-Revived/releases) 中区分；开发工作位于 `dev` 分支。
-- 项目更名为 `c001apk-Revived`，Android 包名仍为 `com.example.c001apk.compose`。签名一致且版本号不低于已安装版本时，可以覆盖安装并保留本地数据。
-- 本地收藏备份入口：**消息 → 本地收藏 → 右上角菜单 → 导出收藏／导入收藏**。更名前后的备份格式兼容。
+> Ultra HDR 需要 Android 14 及以上和兼容设备；实况播放需要图片附带视频数据。
 
-## 构建
+## 下载
 
-工程使用 Gradle Wrapper、JDK 17 或兼容的更高版本、Android SDK 35 和 Build Tools 36.0.0。
+前往 [Releases](https://github.com/frisk1127/c001apk-Revived/releases) 下载，支持 **Android 7.0 及以上**。日常使用建议选择稳定版，想提前体验新功能可以选择预发布版。各版本的具体变化见 [更新日志](CHANGELOG.md)。
 
-在 Windows PowerShell 中执行：
+从旧版 c001apk-compose 升级时，同签名且版本号不低于已安装版本的安装包可直接覆盖安装，保留原有数据。收藏备份入口位于 **消息 → 本地收藏 → 右上角菜单**。
+
+## 开发
+
+开发分支为 `dev`，使用 Kotlin 和 Jetpack Compose。
+
+<details>
+<summary>本地构建</summary>
+
+需要 JDK 17 或兼容的更高版本、Android SDK 35 和 Build Tools 36.0.0。在项目根目录执行：
 
 ```powershell
 .\gradlew assembleDebug
@@ -47,14 +56,14 @@ Ultra HDR 显示需要 Android 14 及以上，并取决于设备和图片本身�
 .\gradlew :app:testDebugUnitTest :media-support:testDebugUnitTest
 ```
 
-APK 位于 `app/build/outputs/apk/` 下对应的构建目录。版本号由 Git 提交数生成，版本名包含提交短哈希；开发分支还会带上分支名和未提交改动标记。
+APK 输出至 `app/build/outputs/apk/` 对应目录。签名信息通过不纳入 Git 的 `local.properties` 配置。
 
-Release 默认开启 R8。需要排查混淆相关问题时，可以使用 `assembleRelease -PdisableR8=true` 构建对照包。签名信息通过不纳入 Git 的 `local.properties` 配置。
+Release 默认开启 R8，排查混淆问题时可使用 `assembleRelease -PdisableR8=true` 构建。
 
-工程包含 `app`、`mojito`、`SketchImageViewLoader` 和 `media-support` 模块。开发分支提供文件日志，便于定位问题。
+</details>
 
-## 来源与许可证
+## 致谢与许可
 
-上游项目：[bggRGjQaUbCoE/c001apk-compose](https://github.com/bggRGjQaUbCoE/c001apk-compose)。
+感谢 [c001apk-compose](https://github.com/bggRGjQaUbCoE/c001apk-compose) 及其贡献者。第三方组件及许可信息可在应用的开源许可证页面查看。
 
-本项目沿用仓库中的 AGPL-3.0 许可证，详见 [LICENSE](LICENSE)。上游与第三方组件的来源说明保留在代码及应用的开源许可证页面中。
+本项目采用 [AGPL-3.0](LICENSE) 许可证。
