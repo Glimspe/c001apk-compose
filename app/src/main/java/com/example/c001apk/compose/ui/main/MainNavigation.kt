@@ -47,6 +47,7 @@ import com.example.c001apk.compose.constant.Constants.PREFIX_FEED
 import com.example.c001apk.compose.constant.Constants.PREFIX_GAME
 import com.example.c001apk.compose.constant.Constants.PREFIX_HTTP
 import com.example.c001apk.compose.constant.Constants.PREFIX_PRODUCT
+import com.example.c001apk.compose.constant.Constants.PREFIX_SEARCH
 import com.example.c001apk.compose.constant.Constants.PREFIX_TOPIC
 import com.example.c001apk.compose.constant.Constants.PREFIX_USER
 import com.example.c001apk.compose.constant.Constants.PREFIX_USER_LIST
@@ -748,15 +749,24 @@ fun NavHostController.onOpenLink(
     url: String,
     title: String? = null,
     needConvert: Boolean = false,
+    onSearch: ((String) -> Unit)? = null,
     onViewFeed: ((String, Boolean) -> Unit)? = null,
-) {
+) {    
     if (url.isEmpty())
         return
     val path = with(url.decode) {
         if (needConvert) {
-            if (this.startsWith(PREFIX_COOLMARKET))
-                this.replaceFirst(PREFIX_COOLMARKET, "/")
-            else {
+            if (this.startsWith(PREFIX_COOLMARKET)) {
+                val rest = this.removePrefix(PREFIX_COOLMARKET)
+                when {
+                    rest.startsWith("/") -> rest
+                    rest.substringBefore('/') in setOf(
+                        "coolapk.com", "www.coolapk.com", "m.coolapk.com",
+                        "coolapk1s.com", "www.coolapk1s.com"
+                    ) -> "/" + rest.substringAfter('/')
+                    else -> "/$rest"
+                }
+            } else {
                 val uri = Uri.parse(this)
                 if (uri.host?.contains(CHANNEL) == true)
                     uri.path ?: url
@@ -834,6 +844,19 @@ fun NavHostController.onOpenLink(
                 .substringBefore('?')
                 .substringBefore('/')
             if (id.isNotEmpty()) navigateToEvent(id)
+        }
+
+        path.startsWith(PREFIX_SEARCH) -> {
+            val sourceUri = Uri.parse(url)
+                .takeIf { it.scheme.equals(PREFIX_COOLMARKET.removeSuffix("://"), ignoreCase = true) }
+                ?: Uri.parse(path)
+            val keyword = sourceUri.getQueryParameter("searchValue").orEmpty()
+            if (keyword.isEmpty()) {
+                navigateToSearch(null, null, null)
+            } else {
+                onSearch?.invoke(keyword)
+                navigateToSearchResult(keyword, null, null, null)
+            }
         }
 
         else -> {
