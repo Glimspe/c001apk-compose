@@ -156,12 +156,37 @@ class LauncherIconTest {
                     it ushr 24 in 150..155
                 } > 50)
                 assertTrue(pixels.any { it == Color.WHITE })
+                assertConnectedSilhouette(pixels, 324)
             }
             val columns = pixels.indices.filter { pixels[it] ushr 24 > 32 }.map { it % 324 }
             bitmap.recycle()
             columns.max() - columns.min() + 1
         }
         assertTrue(widths.getValue(LauncherIcon.REVIVED) <= widths.getValue(LauncherIcon.CLASSIC))
+    }
+
+    private fun assertConnectedSilhouette(pixels: IntArray, width: Int) {
+        val visible = BooleanArray(pixels.size) { pixels[it] ushr 24 >= 96 }
+        val visited = BooleanArray(pixels.size)
+        val pending = ArrayDeque<Int>()
+        val start = pixels.indexOfFirst { it == Color.WHITE }
+        pending.add(start)
+        visited[start] = true
+        while (pending.isNotEmpty()) {
+            val index = pending.removeFirst()
+            val neighbors = listOfNotNull(
+                (index - 1).takeIf { index % width > 0 },
+                (index + 1).takeIf { index % width < width - 1 },
+                (index - width).takeIf { it >= 0 },
+                (index + width).takeIf { it < pixels.size },
+            )
+            neighbors.filter { visible[it] && !visited[it] }.forEach {
+                visited[it] = true
+                pending.add(it)
+            }
+        }
+        assertTrue("Fold and body must form one connected silhouette",
+            visited.count { it } >= visible.count { it } * 0.995)
     }
 
     @Suppress("DEPRECATION")
