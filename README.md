@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="app/src/main/ic_launcher-revived.svg" width="96" alt="c001apk-Revived 图标">
+<img src="docs/assets/c001apk-revived.png" width="128" alt="c001apk-Revived 图标">
 
 <h1>c001apk-Revived</h1>
 
