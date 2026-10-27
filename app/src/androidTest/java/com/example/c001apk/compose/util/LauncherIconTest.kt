@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
@@ -121,13 +122,46 @@ class LauncherIconTest {
                 drawable.foreground.draw(Canvas(bitmap))
                 val pixels = IntArray(108 * 108)
                 bitmap.getPixels(pixels, 0, 108, 0, 0, 108, 108)
-                val foreground = pixels.first { it ushr 24 == 255 }
-                assertEquals(themed.getColor(R.color.ic_launcher_foreground), foreground)
+                val foreground = themed.getColor(R.color.ic_launcher_foreground)
+                assertTrue(pixels.any { it == foreground })
                 assertNotEquals(foreground, (drawable.background as ColorDrawable).color)
+                if (icon == LauncherIcon.REVIVED) {
+                    val accent = themed.getColor(R.color.ic_launcher_revived_accent)
+                    assertNotEquals(foreground, accent)
+                    assertNotEquals((drawable.background as ColorDrawable).color, accent)
+                    assertTrue("Fold accent must remain visible", pixels.any { it == accent })
+                }
                 bitmap.recycle()
                 if (Build.VERSION.SDK_INT >= 33) assertNotNull(drawable.monochrome)
             }
         }
+    }
+
+    @Test
+    @SdkSuppress(minSdkVersion = 33)
+    fun themedIconKeepsFoldShadingAndFitsWithinClassicIconWidth() {
+        val widths = LauncherIcon.entries.associateWith { icon ->
+            val adaptive = ResourcesCompat.getDrawable(context.resources, icon.iconRes, null)
+                as AdaptiveIconDrawable
+            val mask = adaptive.monochrome!!.mutate().apply {
+                setTint(Color.WHITE)
+                setBounds(0, 0, 324, 324)
+            }
+            val bitmap = Bitmap.createBitmap(324, 324, Bitmap.Config.ARGB_8888)
+            mask.draw(Canvas(bitmap))
+            val pixels = IntArray(324 * 324)
+            bitmap.getPixels(pixels, 0, 324, 0, 0, 324, 324)
+            if (icon == LauncherIcon.REVIVED) {
+                assertTrue("Fold shading must survive system tinting", pixels.count {
+                    it ushr 24 in 150..155
+                } > 50)
+                assertTrue(pixels.any { it == Color.WHITE })
+            }
+            val columns = pixels.indices.filter { pixels[it] ushr 24 > 32 }.map { it % 324 }
+            bitmap.recycle()
+            columns.max() - columns.min() + 1
+        }
+        assertTrue(widths.getValue(LauncherIcon.REVIVED) <= widths.getValue(LauncherIcon.CLASSIC))
     }
 
     @Suppress("DEPRECATION")
